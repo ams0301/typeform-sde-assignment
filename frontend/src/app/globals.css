@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-app: #f5f4f0;
+  --color-surface: #ffffff;
+  --color-canvas: #efeeea;
+  --color-line: #e6e4df;
+  --color-inputline: #d6d4ce;
+  --color-ink: #1a1a1a;
+  --color-ink2: #6b6862;
+  --color-ink3: #9b978f;
+  --color-live: #3e9b4f;
+  --color-danger: #d64545;
+  --font-body: var(--font-inter);
+  --font-display: var(--font-grotesk);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-app);
+  color: var(--color-ink);
+  font-family: var(--font-inter);
+  -webkit-font-smoothing: antialiased;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+button:focus {
+  outline: none;
+}
+
+::selection {
+  background: rgba(26, 26, 26, 0.85);
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(26, 26, 26, 0.16);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 26, 26, 0.3);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+.animate-shake {
+  animation: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.8; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 1.6s ease-in-out infinite;
+}
+
+.textarea-auto {
+  field-sizing: content;
+}
