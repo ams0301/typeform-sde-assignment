@@ -1,0 +1,15 @@
+# Render Blueprint — deploys the FastAPI backend (free tier).
+# The frontend deploys on Vercel with API_URL pointed at this service's URL.
+services:
+  - type: web
+    name: typeform-clone-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      - key: DATABASE_URL
+        sync: false
