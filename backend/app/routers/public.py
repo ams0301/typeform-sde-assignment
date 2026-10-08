@@ -61,8 +61,14 @@ def submit_response(slug: str, payload: schemas.ResponseSubmitIn, db: Session = 
             errors.append({"question_id": question.id, "message": str(exc)})
 
     shown = set(payload.path) if payload.path else set(questions.keys())
+    errored_ids = {error["question_id"] for error in errors}
     for question in form.questions:
-        if question.required and question.id in shown and question.id not in validated:
+        if (
+            question.required
+            and question.id in shown
+            and question.id not in validated
+            and question.id not in errored_ids
+        ):
             errors.append({"question_id": question.id, "message": "This is required."})
 
     if errors:

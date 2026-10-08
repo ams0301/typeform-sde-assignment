@@ -74,9 +74,10 @@ export default function EditFormPage({ params }: { params: Promise<{ id: string 
                 ...current,
                 questions: current.questions.map((question) => {
                   const updated = updatedQuestions.find((item) => item.id === question.id);
-                  return updated
-                    ? { ...question, choices: updated.choices, config: updated.config }
-                    : question;
+                  // If the user kept typing while this save was in flight, their
+                  // local edits are newer — don't clobber them with the response.
+                  if (!updated || pending.current.questions?.has(question.id)) return question;
+                  return { ...question, choices: updated.choices, config: updated.config };
                 }),
               }
             : current,

@@ -1,5 +1,7 @@
 # Typeform Clone — SDE Fullstack Assignment
 
+[![CI](https://github.com/ams0301/typeform-sde-assignment/actions/workflows/ci.yml/badge.svg)](https://github.com/ams0301/typeform-sde-assignment/actions/workflows/ci.yml)
+
 A functional clone of Typeform: a drag-and-drop form builder, a shareable public link, and the signature **one-question-at-a-time** conversational fill experience — with responses, per-question stats, and a thank-you screen.
 
 > Built as a hiring assignment for Scaler AI Labs. This is an educational clone of Typeform's UI/UX; it is not affiliated with Typeform.
@@ -109,6 +111,18 @@ Design notes:
 | `POST /api/public/forms/{slug}/submit` | Validate + store submission (`path` = shown question ids; required check applies only to those) |
 
 Validation errors return `422 {detail: {answers: [{question_id, message}]}}` with respondent-friendly copy, mirrored client-side for instant feedback.
+
+## Tests
+
+CI (GitHub Actions) runs the backend test suite plus frontend lint/build on every push. Locally:
+
+```bash
+cd backend
+.venv\Scripts\pip install -r requirements-dev.txt
+.venv\Scripts\python -m pytest -q
+```
+
+The suite runs against a fresh, seeded SQLite database per session and covers: seed integrity, form/question CRUD and reordering, publish guards, public visibility (404 for drafts), submit validation (bad email / out-of-range number and rating / missing required), the logic-jump `path` exemption for skipped required questions, **logic-reference remapping on form duplication**, stats correctness, CSV output, and partial-response completion tracking.
 
 ## Setup
 

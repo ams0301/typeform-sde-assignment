@@ -159,7 +159,7 @@ export function ContentPanel({
   onReorder,
   onDeleteQuestion,
 }: ContentPanelProps) {
-  const [addOpen, setAddOpen] = useState(false);
+  const [addAnchor, setAddAnchor] = useState<"header" | "footer" | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -175,6 +175,39 @@ export function ContentPanel({
     onReorder(arrayMove(questionIds, oldIndex, newIndex));
   };
 
+  const addPopover = (anchor: "header" | "footer") =>
+    addAnchor === anchor && (
+      <>
+        <div className="fixed inset-0 z-20" onClick={() => setAddAnchor(null)} />
+        <div
+          className={cn(
+            "absolute z-30 mt-2 grid w-64 grid-cols-2 gap-1 rounded-2xl border border-line bg-white p-2 shadow-2xl",
+            anchor === "footer" ? "bottom-full mb-2" : "right-0",
+          )}
+        >
+          {QUESTION_TYPE_META.map((meta) => (
+            <button
+              key={meta.key}
+              type="button"
+              onClick={() => {
+                onAdd(meta.key);
+                setAddAnchor(null);
+              }}
+              className="flex items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left transition-colors hover:bg-black/5"
+            >
+              <span
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                style={{ background: meta.tint, color: meta.color }}
+              >
+                <meta.icon className="h-4 w-4" />
+              </span>
+              <span className="text-xs font-medium text-ink">{meta.label}</span>
+            </button>
+          ))}
+        </div>
+      </>
+    );
+
   return (
     <aside className="flex w-[300px] shrink-0 flex-col overflow-y-auto border-r border-line bg-app">
       <div className="flex items-center justify-between px-4 pb-2 pt-4">
@@ -182,38 +215,13 @@ export function ContentPanel({
         <div className="relative">
           <button
             type="button"
-            onClick={() => setAddOpen((open) => !open)}
+            onClick={() => setAddAnchor((anchor) => (anchor === "header" ? null : "header"))}
             className="flex items-center gap-1.5 rounded-lg bg-ink px-2.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-black/75"
           >
             <Plus className="h-3.5 w-3.5" />
             Add content
           </button>
-          {addOpen && (
-            <>
-              <div className="fixed inset-0 z-20" onClick={() => setAddOpen(false)} />
-              <div className="absolute right-0 z-30 mt-2 grid w-64 grid-cols-2 gap-1 rounded-2xl border border-line bg-white p-2 shadow-2xl">
-                {QUESTION_TYPE_META.map((meta) => (
-                  <button
-                    key={meta.key}
-                    type="button"
-                    onClick={() => {
-                      onAdd(meta.key);
-                      setAddOpen(false);
-                    }}
-                    className="flex items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-left transition-colors hover:bg-black/5"
-                  >
-                    <span
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-                      style={{ background: meta.tint, color: meta.color }}
-                    >
-                      <meta.icon className="h-4 w-4" />
-                    </span>
-                    <span className="text-xs font-medium text-ink">{meta.label}</span>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+          {addPopover("header")}
         </div>
       </div>
 
@@ -263,14 +271,17 @@ export function ContentPanel({
       </div>
 
       <div className="p-2">
-        <button
-          type="button"
-          onClick={() => setAddOpen(true)}
-          className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-inputline py-2.5 text-xs font-medium text-ink2 transition-colors hover:border-ink/40 hover:text-ink"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Add content
-        </button>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setAddAnchor((anchor) => (anchor === "footer" ? null : "footer"))}
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-inputline py-2.5 text-xs font-medium text-ink2 transition-colors hover:border-ink/40 hover:text-ink"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add content
+          </button>
+          {addPopover("footer")}
+        </div>
       </div>
     </aside>
   );

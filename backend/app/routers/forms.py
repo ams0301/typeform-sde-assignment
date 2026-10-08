@@ -2,6 +2,7 @@ import csv
 import io
 import secrets
 import string
+from copy import deepcopy
 from statistics import mean
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -137,6 +138,13 @@ def duplicate_form(form_id: int, db: Session = Depends(get_db)):
     )
     db.add(copy)
     db.flush()
+
+    # Copy questions/choices first, tracking old→new id maps, then rebuild
+    # each config so logic-jump rules point at the copy's own ids.
+    question_id_map: dict[int, int] = {}
+    choice_id_maps: dict[int, dict[int, int]] = {}
+    copied: list[tuple[models.Question, models.Question]] = []
+
     for question in source.questions:
         new_question = models.Question(
             form_id=copy.id,
@@ -145,12 +153,42 @@ def duplicate_form(form_id: int, db: Session = Depends(get_db)):
             description=question.description,
             required=question.required,
             position=question.position,
-            config=dict(question.config or {}),
         )
         db.add(new_question)
         db.flush()
+        question_id_map[question.id] = new_question.id
+        choice_id_maps[question.id] = {}
         for choice in question.choices:
-            db.add(models.Choice(question_id=new_question.id, label=choice.label, position=choice.position))
+            new_choice = models.Choice(
+                question_id=new_question.id, label=choice.label, position=choice.position
+            )
+            db.add(new_choice)
+            db.flush()
+            choice_id_maps[question.id][choice.id] = new_choice.id
+        copied.append((question, new_question))
+
+    for old_question, new_question in copied:
+        config = deepcopy(old_question.config or {})
+        logic = config.get("logic")
+        if isinstance(logic, list):
+            config["logic"] = [
+                {
+                    "choice_id": choice_id_maps[old_question.id].get(
+                        rule["choice_id"], rule["choice_id"]
+                    ),
+                    "target_question_id": question_id_map.get(
+                        rule["target_question_id"], rule["target_question_id"]
+                    ),
+                }
+                for rule in logic
+                if isinstance(rule, dict)
+            ]
+        if config.get("always_jump"):
+            config["always_jump"] = question_id_map.get(
+                config["always_jump"], config["always_jump"]
+            )
+        new_question.config = config
+
     db.commit()
     db.refresh(copy)
     return form_detail_to_dict(copy, 0)
