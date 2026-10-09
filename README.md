@@ -8,8 +8,15 @@ A functional clone of Typeform: a drag-and-drop form builder, a shareable public
 
 ## Live demo & repo
 
-- **App:** `http://localhost:3000` after setup (see below)
-- **Try the respondent flow:** open any published form's `/to/<slug>` link — seeded forms are ready to fill, no login needed
+- **App:** https://aadarsh-typeform-clone-web.vercel.app (Next.js on Vercel)
+- **API:** https://typeform-clone-api.vercel.app (FastAPI as a Vercel serverless function)
+- **Try the respondent flow** — no login, one question at a time:
+  - Customer feedback (all 8 question types): https://aadarsh-typeform-clone-web.vercel.app/to/feedback-nimbus-x7
+  - Product Hunt launch (dark navy theme): https://aadarsh-typeform-clone-web.vercel.app/to/posthunt-launch
+  - Support triage (logic jumps — pick "I found a bug"): https://aadarsh-typeform-clone-web.vercel.app/to/nimbus-support
+- **Source:** https://github.com/ams0301/typeform-sde-assignment
+
+> **Deployment notes:** both services run on Vercel (Hobby plan). The web project is git-connected to this repo (`rootDirectory: frontend`) and redeploys on every push; the API project exposes the FastAPI app as a Python serverless function (`backend/api/index.py` + `backend/vercel.json` rewrite), with `API_URL` pointing the frontend's `/api/*` rewrites at it. On serverless, SQLite lives in `/tmp` (read-only filesystem elsewhere), so the database **re-seeds itself on cold starts** — perfect for demos; for durable persistence swap `DATABASE_URL` to a mounted disk or managed Postgres (same SQLAlchemy models). A one-click **Render blueprint** (`render.yaml`) is included as the persistent-disk alternative.
 
 ## Tech stack
 
