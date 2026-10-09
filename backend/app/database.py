@@ -4,7 +4,13 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(BASE_DIR, "data")
+
+# Vercel's serverless filesystem is read-only except /tmp, so the SQLite
+# file lives there when running on Vercel (re-seeded on each cold start).
+if os.environ.get("VERCEL"):
+    DATA_DIR = "/tmp/typeform-data"
+else:
+    DATA_DIR = os.path.join(BASE_DIR, "data")
 os.makedirs(DATA_DIR, exist_ok=True)
 
 DATABASE_URL = os.environ.get("DATABASE_URL", f"sqlite:///{os.path.join(DATA_DIR, 'app.db')}")
